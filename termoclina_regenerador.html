@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="ca"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Emmagatzematge tèrmic en un llit fix</title><style>/* V9 Energiespeicher: shell styles (from V8). RWTH corporate colours, Arial, white. */
+:root{
+  --blue:#00549F; --blue75:#407FB7; --blue50:#8EBAE5; --blue25:#C7DDF2; --blue10:#E8F1FA;
+  --ink:#1a1a1a; --grey:#646567; --grey50:#9C9E9F; --grey25:#CFD1D2; --grey10:#ECEDED;
+  --orange:#F6A800; --red:#CC071E; --green:#57AB27; --petrol:#006165; --magenta:#E30066;
+  --font:Arial,"Helvetica Neue",Helvetica,"Liberation Sans",sans-serif;
+}
+html,body{background:#fff}
+.reveal{font-family:var(--font);color:var(--ink);font-size:22px;line-height:1.35}
+.reveal .slides{text-align:left}
+.reveal .slides>section{padding:34px 60px 56px 60px;box-sizing:border-box;height:720px;width:1280px}
+.reveal h1,.reveal h2,.reveal h3{font-family:var(--font);color:var(--ink);margin:0;letter-spacing:0;text-transform:none}
+.reveal .kicker{font-size:15px;font-weight:bold;color:var(--blue);margin:0 0 6px 0;letter-spacing:.02em}
+.reveal h2{font-size:34px;line-height:1.15;font-weight:bold;max-width:940px}
+.reveal p{margin:0 0 .6em 0}
+.reveal ul{margin:0 0 0 1.1em;padding:0}
+.reveal li{margin:0 0 .45em 0}
+.reveal strong,.reveal b{color:var(--blue)}
+.reveal .muted{color:var(--ink)}
+.reveal .small{font-size:17px}
+.reveal .num{font-variant-numeric:tabular-nums}
+.reveal sub{vertical-align:sub;font-size:.68em;line-height:0}
+.reveal sup{vertical-align:super;font-size:.68em;line-height:0}
+.reveal a{color:var(--blue75)}
+
+/* vertical balance: title on top, content centred in the space below */
+.reveal .slides>section:not(.title){flex-direction:column}
+.reveal .slides>section:not(.title)>h2+*{margin-top:auto!important;margin-bottom:auto!important}
+
+/* layout helpers */
+.reveal .cols{display:flex;gap:48px;align-items:flex-start;margin-top:28px}
+.reveal .col{flex:1}
+.reveal .box{border:2.5px solid var(--blue);border-radius:10px;padding:12px 18px}
+.reveal .key{color:var(--blue);font-weight:bold}
+.reveal table.kv{border-collapse:collapse;font-size:20px}
+.reveal table.kv td{padding:5px 18px 5px 0;border:none}
+.reveal table.kv td:last-child{font-weight:bold;text-align:right}
+
+/* figures */
+.reveal svg text{font-family:var(--font)}
+.reveal .fig{position:relative;display:inline-block}
+/* label for AI generated images, icons and illustrations */
+/* AI labels are collected into the footer (bottom right, above the source), see app.js */
+
+/* frame like Enric's defense deck: band at the left edge with page number, notes left, sources right, small logo top right */
+.reveal .band{position:absolute;left:0;bottom:0;width:60px;height:40px}
+.reveal .logo-s{position:absolute;right:40px;top:26px;height:44px}
+.reveal .foot{position:absolute;left:60px;right:40px;bottom:12px;display:flex;justify-content:space-between;align-items:flex-end;gap:30px;font-size:13px;line-height:1.35;color:var(--ink)}
+.reveal .foot>div:last-child{text-align:right}
+.reveal .foot a{color:var(--ink);text-decoration:none}
+.reveal .band span{position:absolute;bottom:12px;left:0;width:60px;text-align:center;color:var(--ink);font-size:13px}
+
+/* poll options */
+.reveal .opts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}
+.reveal .opt{border:2px solid var(--blue);border-radius:10px;padding:16px 20px;font-size:24px;line-height:1.3}
+.reveal .opt b{margin-right:8px}
+.reveal .opt.answer.visible{background:var(--blue);color:#fff}
+.reveal .opt.answer.visible b{color:#fff}
+
+/* simulations */
+.reveal .sim-ctl{display:flex;flex-wrap:nowrap;gap:8px 16px;font-size:14px;margin-bottom:8px;white-space:nowrap}
+.reveal .sim-ctl .grp{display:inline-flex;align-items:center;gap:5px}
+.reveal .sim-ctl .k{font-weight:bold;margin-right:3px}
+.reveal .sim-ctl button{font:14px var(--font);color:var(--ink);background:#fff;border:2px solid var(--blue);border-radius:8px;padding:3px 8px;cursor:pointer;white-space:nowrap}
+.reveal .sim-ctl button.on{background:var(--blue);color:#fff}
+.reveal .sim-ctl button:disabled{display:none}
+.reveal .sim-ctl input[type=range]{width:180px;accent-color:var(--blue);margin:0 4px 0 10px}
+.reveal .sim-slider-val{display:inline-block;min-width:52px;font-weight:bold}
+.reveal .sim-obs{font-size:17px;min-height:44px;margin-top:2px}
+.reveal .sim{display:flex;flex-direction:column;align-items:flex-start}
+.reveal .sim-obs b{color:var(--blue)}
+.reveal .sim-obs b.hot{color:var(--red)}
+
+/* figures converted from pptx */
+.reveal svg.pptfig{display:block;margin:0 auto}
+.reveal svg.pptfig foreignObject div{line-height:1.18}
+
+/* agenda */
+.reveal .agenda-list{margin:56px 0 0 0;padding:0 0 0 1.6em;font-size:28px;line-height:1.25}
+.reveal .agenda-list li{margin:0 0 18px 0;padding-left:.3em}
+.reveal .agenda-list li.now{color:var(--blue);font-weight:bold}
+
+/* title slide */
+.reveal section.title{padding:150px 90px 0 110px;flex-direction:column;align-items:flex-start}
+.reveal section.title .band{display:none}
+.reveal section.title img.logo{position:absolute;right:60px;bottom:50px;height:58px;margin:0}
+.reveal .slide-number a{color:var(--ink);text-decoration:none}
+.reveal section.title h1{font-size:50px;line-height:1.1;font-weight:bold;max-width:1000px}
+.reveal section.title .sub{font-size:30px;color:var(--ink);margin-top:8px}
+.reveal section.title .info{display:inline-block;background:var(--blue);color:#fff;font-size:17px;line-height:1.6;padding:14px 26px 14px 26px;margin-top:46px;min-width:520px}
+
+/* fragments: plain fade, no movement */
+.reveal .fragment{transition:opacity .25s ease}
+.reveal .controls{color:var(--blue75)}
+.reveal .progress{color:var(--blue);height:3px}
+
+/* photo rows */
+.reveal .photos{display:flex;gap:26px;width:1120px}
+.reveal .photos figure{flex:1;margin:0}
+.reveal .photos figcaption{font-weight:bold;font-size:20px;margin-bottom:8px}
+.reveal .photos img{width:100%;height:280px;object-fit:cover;border-radius:6px;display:block;margin:0}
+.reveal .photos p{font-size:17px;margin:8px 0 0}
+
+/* pros and cons lists */
+.reveal ul.pc{margin:0 0 0 22px;padding:0;font-size:21px;line-height:1.35}
+.reveal ul.pc li{margin:0 0 10px}
+
+/* formulas (capacity factor definition) */
+.reveal .eqrow{display:flex;align-items:center;gap:36px;margin:30px 0 0 0}
+.reveal .eqname{width:230px;font-size:24px;font-weight:bold}
+.reveal .eq{font-size:30px;display:inline-flex;align-items:center;gap:12px;white-space:nowrap}
+.reveal .frac{display:inline-flex;flex-direction:column;align-items:stretch;line-height:1.25}
+/* both parts stretch to the wider one, so the fraction bar overhangs numerator and denominator */
+.reveal .frac>span{text-align:center;padding:0 10px}
+.reveal .frac>span:first-child{border-bottom:2px solid var(--ink);padding-bottom:3px}
+.reveal .frac>span:last-child{padding-top:3px}
+.reveal .eqlab{font-size:18px;line-height:1.45;margin-left:20px}
+.reveal .eqrow>.eq:nth-child(2){min-width:290px}
+
+/* LCOE definition: same columns for all formulas, so the explanations line up */
+.reveal .eqfix .eqrow{display:grid;grid-template-columns:240px 500px 360px;gap:0}
+.reveal .eqfix .eqname{width:auto}
+.reveal .eqfix .eqlab{margin-left:0}
+
+/* LCA result: numerator and denominator in the colours of the outputs and of the operation phase */
+.reveal .c-bord{color:#A11035}
+.reveal .c-petrol{color:#006165}
+.reveal .c-green{color:#3F8A1C}
+.reveal .frac.fbox>span{padding:5px 16px;border-radius:8px}
+.reveal .frac.fbox>span:first-child{border:2px solid #A11035;background:#F5E8E5;margin-bottom:8px}
+.reveal .frac.fbox>i{display:block;height:2px;background:var(--ink)}
+.reveal .frac.fbox>span:last-child{border:2px solid #006165;background:#E6ECEC;margin-top:8px}
+
+/* small fact boxes under a figure */
+.reveal .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:22px;font-size:18px;line-height:1.35}
+.reveal .facts>div{border:2px solid var(--ink);border-radius:10px;padding:10px 14px}
+.reveal .facts b{color:var(--blue);font-weight:bold}
+.reveal .c-bord,.reveal .c-petrol,.reveal .c-green{font-weight:bold}
+
+/* two outlined boxes side by side */
+.reveal .twobox{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:12px;font-size:19px;line-height:1.35}
+.reveal .box.bord{border-color:#A11035}
+.reveal .box.green{border-color:#3F8A1C}
+
+/* outlook slides: two photos with caption, text and credit */
+.reveal .photos.outlook figure{max-width:547px}
+.reveal .photos.outlook img{height:300px}
+.reveal .photos.outlook img.contain{object-fit:contain;border-radius:0}
+.reveal .photos p.credit{font-size:13px;margin:4px 0 0}
+
+/* summary: rules of thumb as label, value, comment */
+.reveal .rules{display:grid;grid-template-columns:250px 330px 1fr;column-gap:24px;row-gap:16px;align-items:center;font-size:20px;line-height:1.3;border:2px solid var(--ink);border-radius:10px;padding:18px 22px}
+.reveal .rules .rl{font-weight:bold}
+.reveal .rules .rv{font-weight:bold;color:var(--blue)}
+.reveal .rules .rc{font-size:17px}
+.reveal .c-blue{color:var(--blue);font-weight:bold}
+
+/* polls: question text as large as the options; a two-column pros/cons slide with larger text */
+.reveal div:has(>.opts)>p{font-size:24px;line-height:1.4}
+.reveal .cols.big{font-size:24px}
+.reveal .cols.big ul.pc{font-size:24px}
+.reveal .cols.big .box{padding:20px 26px}
+
+/* tracking poll: the two sites as plain text, so they do not look like answer options */
+.reveal .sites2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:22px;font-size:24px;line-height:1.35}
+.reveal .sites2 p{margin:0}
+.reveal .sites2 b{color:var(--blue);font-weight:bold}
+/* balance: hidden fragments count as visible while the slide is measured */
+.reveal section.measuring .fragment{visibility:visible!important}
+
+/* ===== V9 additions ===== */
+/* three temperature ranges */
+.reveal .trange{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;width:1140px;font-size:20px;line-height:1.35}
+.reveal .tcol{border:2.5px solid var(--ink);border-radius:12px;padding:0 0 10px 0;overflow:hidden}
+.reveal .tcol .th{font-size:25px;font-weight:bold;padding:12px 18px;margin-bottom:10px}
+.reveal .tcol .th span{font-size:21px;font-weight:normal}
+.reveal .tcol.hot{border-color:#CC071E}.reveal .tcol.hot .th{background:#F3C2C7}
+.reveal .tcol.mid{border-color:#F6A800}.reveal .tcol.mid .th{background:#FDE6B3}
+.reveal .tcol.low{border-color:#00549F}.reveal .tcol.low .th{background:#C7DDF2}
+.reveal .tcol p{margin:0 18px 12px 18px}
+.reveal .tcol p b{display:block;color:var(--ink)}
+/* worked example steps */
+.reveal .steps{display:flex;flex-direction:column;gap:20px;margin-top:22px}
+.reveal .steps>div{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.reveal .steps .sl{display:inline-block;width:210px;font-weight:bold}
+/* grid of six boxes */
+.reveal .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;width:1120px;font-size:22px;line-height:1.4}
+.reveal .grid3 .box{border-color:var(--ink);padding:16px 20px}
+.reveal .grid3 .box b{color:var(--blue)}
+/* reaction equations */
+.reveal .rx{display:flex;flex-direction:column;gap:22px;font-size:32px}
+.reveal .rxrow{display:grid;grid-template-columns:200px 360px 70px 360px;align-items:center}
+.reveal .rxl{font-size:26px;font-weight:bold}
+.reveal .rxa{text-align:center}
+.reveal .c-red{color:#CC071E}
+.reveal .eqfix.wide .eqrow{grid-template-columns:240px 620px 260px}
+.reveal .qdot{display:inline-block;position:relative}
+.reveal .qdot::after{content:"";position:absolute;left:50%;top:0.02em;width:.15em;height:.15em;margin-left:-.075em;border-radius:50%;background:currentColor}
+.reveal .cbar{text-decoration:overline;text-decoration-thickness:.06em}
+.reveal .facts2 p{font-size:22px;line-height:1.45;margin:0 0 16px 0}
+.reveal .eqfix.wide .eq{font-size:27px}
+.reveal .eqfix.wide .eqrow{grid-template-columns:220px 600px 300px;margin-top:26px}
+.reveal .rxrow{grid-template-columns:190px 330px 60px 330px}
+.reveal .rx{font-size:36px}
+.reveal .steps>div{display:block}
+.reveal .steps .fx{white-space:nowrap}
+.reveal .steps .frac,.reveal .eqfix.wide .frac{vertical-align:middle;display:inline-flex}
+.reveal .eqfix.wide .eq{display:inline-block;white-space:nowrap}
+.reveal .eqfix.wide .eqrow{align-items:center}
+.reveal .quotes{display:flex;gap:30px;width:1120px}
+.reveal .quote{flex:1;border:2.5px solid var(--ink);border-radius:10px;padding:16px 22px}
+.reveal .quote .q{font-size:25px;line-height:1.4;margin:0 0 12px}
+.reveal .quote .who{font-size:18px;margin:0}
+.reveal .quote .who b{color:var(--blue);margin-right:6px}
+.reveal .sw{display:inline-block;width:22px;height:16px;margin-right:10px;vertical-align:-1px}
+.reveal .sw.g{background:#D9EDCC}.reveal .sw.o{background:#FDE6B3}.reveal .sw.k{background:#D9DADB}
+.reveal .bign{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding:4px 0}
+.reveal .bign span{font-size:22px}.reveal .bign b{font-size:40px;color:var(--blue)}
+.reveal .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;width:1140px}
+.reveal .tile{border:2.5px solid var(--ink);border-radius:10px;padding:12px 14px;font-size:19px;line-height:1.35}
+.reveal .tile .ic{display:flex;justify-content:center;margin-bottom:6px}
+.reveal .tile b{display:block;color:var(--blue);font-size:22px;margin-bottom:6px}
+.reveal .tile p{margin:0 0 6px}
+.reveal .eqrow{display:flex;align-items:center;gap:36px;margin:30px 0 0 0}
+.reveal .eqname{width:230px;font-size:24px;font-weight:bold}
+.reveal .eq{font-size:30px;display:inline-flex;align-items:center;gap:12px;white-space:nowrap}
+.reveal .frac{display:inline-flex;flex-direction:column;align-items:stretch;line-height:1.25}
+/* both parts stretch to the wider one, so the fraction bar overhangs numerator and denominator */
+.reveal .frac>span{text-align:center;padding:0 10px}
+.reveal .frac>span:first-child{border-bottom:2px solid var(--ink);padding-bottom:3px}
+.reveal .frac>span:last-child{padding-top:3px}
+.reveal .eqlab{font-size:18px;line-height:1.45;margin-left:20px}
+.reveal .eqrow>.eq:nth-child(2){min-width:290px}
+
+/* LCOE definition: same columns for all formulas, so the explanations line up */
+.reveal .eqfix .eqrow{display:grid;grid-template-columns:240px 500px 360px;gap:0}
+.reveal .eqfix .eqname{width:auto}
+.reveal .eqfix .eqlab{margin-left:0}
+.reveal .eqpair .eq{min-width:0!important}
+/* chapter 2: animation left, facts right */
+.reveal .k2row{display:flex;gap:34px;align-items:center}
+.reveal .k2facts{width:300px;display:flex;flex-direction:column;gap:20px;font-size:19px;line-height:1.3}
+.reveal .k2facts .kf{border:2px solid var(--ink);border-radius:10px;padding:12px 16px}
+.reveal .k2facts .kf b{display:block;font-size:30px;line-height:1.2;margin:4px 0 2px}
+.reveal .k2facts .key{font-size:21px;margin:0}
+.reveal .k2facts .k2react{font-size:17px;line-height:1.3;padding:10px 14px}
+.reveal .k2facts .k2react .rh{font-weight:bold;color:var(--blue);font-size:19px;margin-bottom:2px}
+.reveal .k2facts .k2react .rxl{white-space:nowrap;margin:0 0 6px;font-size:17px;font-weight:normal;line-height:1.3}
+
+/* 2.6 poll with three options in one row */
+.reveal .opts.opts3{grid-template-columns:1fr 1fr 1fr}
+/* 2.7 batteries: two charts side by side (sim_k2_bat.js), three click steps */
+.reveal .k2bat{display:flex;gap:40px}
+.reveal .k2bat .col{width:575px}
+.reveal .k2bat .ptitle{font-size:20px;font-weight:bold;height:34px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.reveal .k2bat .sim-ctl{display:inline-flex;gap:4px}
+.reveal .k2bat .sim-ctl .grp{display:inline-flex;gap:4px}
+.reveal .k2bat svg{display:block}
+.reveal .k2bat text{font-family:var(--font)}
+/* 2.9 Carnot battery: photo of the ETES pilot plant in the right column */
+.reveal .k2facts .k2photo{margin:0}
+.reveal .k2facts .k2photo img{width:300px;height:auto;display:block;margin:0;border-radius:6px}
+.reveal .k2facts .k2photo figcaption{font-size:16px;line-height:1.3;margin-top:4px;color:var(--ink)}
+.reveal .k2facts>p:not(.key){margin:0;font-size:19px}
+
+/* 3.3 solar multiple over the day (sim_k3_day.js) */
+.reveal .k3row{display:flex;gap:24px;align-items:flex-start}
+.reveal .k3left{display:flex;flex-direction:column}
+.reveal .k3leg{display:flex;gap:16px;font-size:15px;margin-left:72px;margin-top:2px;white-space:nowrap}
+.reveal .k3leg i{display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+.reveal .k3right{display:flex;flex-direction:column;align-items:center;width:580px}   /* wider drawing, K73, K78 */
+.reveal .k3eq{font-size:19px;display:flex;align-items:center;margin-top:46px;white-space:nowrap}
+.reveal .k3fr{display:inline-flex;flex-direction:column;align-items:center}
+.reveal .k3fr>span{padding:1px 6px;white-space:nowrap}
+.reveal .k3fr>.k3bar{border-top:2px solid var(--ink);width:100%;height:0;padding:0}
+.reveal .k3bc{border:2px solid var(--ink);border-radius:10px;padding:8px 14px;font-size:15px;line-height:1.4;margin-top:44px;align-self:center}   /* tight box, centred under the drawing, K73, K77 */
+.reveal .k3ov{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.reveal .k3b{font-weight:bold;color:var(--ink)}
+
+/* 3.4 full-load hours over the solar multiple (sim_k3_flh.js) */
+.reveal .k4row{display:flex;gap:24px;align-items:flex-start}
+.reveal .k4left{position:relative;display:flex;flex-direction:column;align-items:center}
+.reveal .k4eq{position:absolute;left:120px;top:14px;font-size:22px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.reveal .k4key{margin:6px 0 0;font-size:24px;text-align:center}
+
+/* 3.6 tree: the liquid branch is highlighted when the panel below appears (click) */
+.reveal section:has(.k3liqpanel.visible) .k3liq{stroke:var(--blue);stroke-width:4}
+.reveal .k3photos{display:flex;justify-content:center;gap:28px;align-items:stretch}
+.reveal .k3hr{height:2px;background:var(--blue);margin:0 0 12px}   /* separates the medium tree from the storage concept, K77 */
+.reveal .k3tag{position:absolute;left:12px;top:8px;color:#fff;font-weight:bold;font-size:24px;line-height:1.2;text-shadow:0 0 4px #000,0 0 2px #000}
+.reveal .k3photos figure{margin:0}
+.reveal .k3ph{position:relative;line-height:0}
+.reveal .k3ph img{display:block;margin:0;border-radius:6px}
+.reveal .k3ph .k3mk{position:absolute;left:0;top:0}
+.reveal .k3photos figcaption{font-size:19px;margin-top:6px;text-align:center;color:var(--ink)}
+
+/* 3.7 two figures next to the beds (K77) */
+.reveal .k3figs{display:flex;gap:16px;align-items:flex-start}
+.reveal .k3thermo svg{width:560px;height:auto}
+.reveal .k3figs figure{margin:0}
+.reveal .k3figs img{display:block;height:280px;width:auto;margin:0;border-radius:6px}
+.reveal .k3figs figcaption{font-size:16px;line-height:1.3;margin-top:4px;color:var(--ink);max-width:250px}
+
+/* 3.9 regenerator: larger controls in the left column */
+.reveal .rg-left .sim-ctl button{font-size:19px;padding:4px 10px}
+.reveal .rg-left .k3fr>span{padding:1px 4px}
+.reveal .rg-cnt{display:inline-flex;align-items:center;gap:12px;align-self:flex-start;margin:4px 0 10px;padding:2px 12px;gap:6px;border:2px solid var(--blue);border-radius:10px}
+.reveal .rg-roll{position:relative;display:inline-block;width:2.2ch;height:1.25em;overflow:hidden;font-size:20px;font-weight:bold;color:var(--blue);line-height:1.25}
+.reveal .rg-num{position:absolute;left:0;right:0;text-align:center}
+.reveal .rg-num.in{animation:rgIn .35s ease-out}
+.reveal .rg-num.out{animation:rgOut .35s ease-in forwards}
+.reveal .rg-num.in.fast{animation-duration:.12s}
+@keyframes rgIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes rgOut{from{transform:translateY(0)}to{transform:translateY(-100%)}}
+.reveal .rg-bc{margin-top:auto;align-self:flex-start;font-size:15px;white-space:nowrap;padding:6px 10px}
+.reveal .rg-left .sim-ctl button{background:var(--blue);color:#fff;font-weight:bold;font-size:17px;padding:3px 8px}
+.reveal .rg-left .sim-ctl button.on{background:#00305A;border-color:#00305A}
+.reveal .rg-dp{margin-top:2px}
+.reveal .rg-dp input{width:170px;accent-color:var(--blue);vertical-align:middle;margin:0 2px}
+.reveal .rg-left .sim-ctl button.off{background:#fff;color:var(--blue);cursor:default}
+
+/* 3.10 and 3.12: facts column a bit wider than chapter 2; 3.11 cutaway and plot side by side (sim_k3_latent.js) */
+.reveal .k3facts{width:340px;align-self:flex-end}
+/* 3.10, 3.12: row over the full width, so the facts sit in the bottom right corner (Enric 17.11.2026, K114) */
+.reveal .k2row.k3corner{width:1160px;justify-content:space-between}
+.reveal .k3facts .k3div{border-top:2px solid var(--ink);margin:10px 0}
+.reveal .k3lat{display:flex;flex-direction:column}
+.reveal .k3lat .key{font-size:21px;margin:0 0 0 auto;width:470px}
+.reveal .k3lat-row{display:flex;gap:30px;align-items:flex-start}
+.reveal .k3lat-cell{display:flex;flex-direction:column}
+.reveal .k3lat-cell svg,.reveal svg.k3lat-plot{display:block}
+.reveal .k3lat-leg{font-size:19px;margin-left:30px}
+.reveal .k3lat-leg span{margin-right:28px}
+.reveal .k3lat-leg i{display:inline-block;width:22px;height:22px;border:2px solid var(--ink);border-radius:5px;vertical-align:-5px;margin-right:8px}
+/* 3.13 seasonal heat storage (K123, K124): wider facts column for the aerial photo, CAPEX box with two rows */
+.reveal .k2facts.k3pit{width:410px;align-self:center}
+.reveal .k2facts.k3pit .k2photo img{width:410px}
+.reveal .k2facts.k3pit .kf .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+.reveal .k2facts.k3pit .kf .row span{font-size:19px}
+.reveal .k2facts.k3pit .kf .row b{display:inline;font-size:25px;margin:0}
+
+/* ---- chapter 4 Kosten (K130, K131) ---- */
+.reveal .k4pe{display:flex;flex-direction:column;align-items:center}
+.reveal .k4pe-def{font-size:24px;margin:10px 0 6px}
+.reveal .k4pe-task{font-size:24px;margin:0 0 14px}
+.reveal .k4pe-task b{color:var(--ink)}
+.reveal .k4task .fig svg{height:460px;width:auto}
+.reveal .k4task .fig.k4tl{margin:0 0 14px} .reveal .k4task .fig.k4tl svg{height:auto}
+.reveal .k4pe .key{font-size:24px;margin:6px 0 0;text-align:center}
+.reveal .k4calc{display:flex;gap:40px;align-items:flex-start}
+.reveal .k4c-left{width:520px}
+.reveal .k4c-left .sim-ctl{font-size:19px} .reveal .k4c-left .sim-ctl button{font-size:19px;padding:4px 14px}
+.reveal .k4c-grid{display:grid;grid-template-columns:300px 150px 70px;row-gap:8px;align-items:center;font-size:18px;margin-top:10px}
+.reveal .k4c-grid .u{font-size:15px}
+.reveal .k4c-grid b,.reveal .k4c-f b,.reveal .k4l-side .kf b,.reveal .k4l-v{color:var(--ink)}
+.reveal .k4c-grid input[type=range]{width:140px;accent-color:var(--blue)}
+.reveal .k4c-grid .v{font-weight:bold;text-align:right;font-size:20px}
+.reveal .k4c-fix{font-size:16px;margin:12px 0 0}
+.reveal .k4c-f{display:flex;gap:50px;align-items:center;margin-top:12px;font-size:22px;white-space:nowrap}
+.reveal .k4c-f>span{display:inline-flex;align-items:center;gap:8px}
+.reveal .k4l-ctl{font-size:19px;align-items:center} .reveal .k4l-ctl button{font-size:18px;padding:4px 14px;margin-left:14px}
+.reveal .k4l-ctl input[type=range]{width:300px} .reveal .k4l-v{display:inline-block;width:90px;font-size:20px}
+.reveal .k4l-row{display:flex;gap:16px;align-items:flex-start}
+.reveal .k4l-side{width:295px;margin-top:40px;font-size:19px}
+.reveal .k4l-side .kf{border:2px solid var(--ink);border-radius:10px;padding:8px 14px;margin:0 0 14px}
+.reveal .k4l-side .kf .row{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0}
+.reveal .k4l-side .kf b{font-size:24px;font-weight:bold}
+.reveal .k4l-side .key{font-size:21px;margin:0}
+.reveal .k4m-ctl{font-size:20px;align-items:center;justify-content:center} .reveal .k4m-ctl input[type=range]{width:260px} .reveal .k4m-pv{display:inline-block;width:50px;font-size:22px;color:var(--ink)} .reveal .k4m-v{display:inline-block;width:60px;font-size:22px;color:var(--ink)}
+.reveal .k4m-row{display:flex;gap:30px;align-items:center;margin-top:10px}
+.reveal .k4m-tab{border-collapse:collapse;font-size:18px}
+.reveal .k4m-tab th,.reveal .k4m-tab td{white-space:nowrap;padding:7px 10px;border-bottom:1px solid var(--ink);text-align:right;color:var(--ink)}
+.reveal .k4m-tab th:first-child,.reveal .k4m-tab td:first-child{text-align:left}
+.reveal .k4m-tab th i{display:inline-block;width:14px;height:14px;margin-right:6px;vertical-align:-1px}
+.reveal .k4t{display:flex;flex-direction:column;align-items:center}
+.reveal .k4t-row{display:flex;gap:40px;align-items:center}
+.reveal .k4t .key{font-size:22px;margin:4px 0 0;text-align:center}
+
+/* 4.5 Welcher Speicher fuer welche Aufgabe (K150): Schmidt 2019 Fig. 4 (2030) with rings, Ruhnau 2022 Fig. 1a, b */
+.reveal .k4s5{display:flex;justify-content:space-around;align-items:flex-start;gap:30px}
+.reveal .k4s5 .cap{font-size:20px;font-weight:bold;margin:0 0 10px;text-align:center}
+.reveal .k4s5fig{position:relative;height:455px;width:552px}
+.reveal .k4s5fig img,.reveal .k4s5fig svg{position:absolute;left:0;top:0;width:552px;height:455px;margin:0}
+.reveal .k4s5leg{font-size:17px;line-height:1.5;margin-top:8px}
+.reveal .k4s5leg i{display:inline-block;width:12px;height:12px;border-radius:50%;border:4px solid;margin-right:8px;vertical-align:-1px}
+.reveal .k4s5r img{display:block;margin:0 auto}
+.reveal .k4s5rl{height:84px}
+.reveal .k4s5rf{height:409px;margin-top:10px!important}
+/* 4.7 Solarstrom in der Nacht (K155 to K158) */
+.reveal .k4s7{display:flex;justify-content:space-between;align-items:center;gap:24px}
+.reveal .k4s7 .cap{font-size:20px;font-weight:bold;margin:0 0 8px;text-align:center}
+.reveal .k4s7l .fig svg{width:740px;height:auto;display:block}
+.reveal .k4s7today{font-size:17px;margin:6px 0 0;text-align:center;width:587px} /* centred on the x axis: 2 x (100 + 225) / 820 x 740 */
+.reveal .k4s7r{width:405px;flex:none}
+.reveal .k4s7l{flex:none}
+.reveal .k4ttl{font-weight:bold;color:#1a1a1a}
+.reveal .k4card{border:2.5px solid #1a1a1a;border-radius:14px;overflow:hidden;margin-bottom:18px}
+.reveal .k4pic{height:150px;background-size:cover}
+.reveal .k4ct{padding:8px 12px 10px;font-size:17px;line-height:1.4;text-align:left}
+/* 4.8 hub (K166): dimmed parts, moving white dots on active links */
+.reveal #sim-k4-hub svg{display:block;width:1120px;height:auto}
+.reveal #sim-k4-hub .sim-ctl{justify-content:center;margin-bottom:8px}
+.reveal #sim-k4-hub .sim-ctl button{font-size:19px;padding:4px 14px}
+.reveal #sim-k4-hub g.hl.dim{opacity:.15;transition:opacity .3s}
+.reveal #sim-k4-hub g.hb.act > rect:first-of-type{stroke:#00549F;stroke-width:5}
+.reveal #sim-k4-hub .flow{display:none}
+.reveal #sim-k4-hub .act .flow{display:inline;stroke-dasharray:0.1 14;animation:hubflow .8s linear infinite}
+@keyframes hubflow{from{stroke-dashoffset:14.1}to{stroke-dashoffset:0}}
+/* 4.9 vicious circle (K167) */
+.reveal .k4fin svg{display:block;width:1160px;height:auto}
+
+body{margin:0}
+.reveal .slides>section.pg{display:block!important;position:relative;height:auto;width:auto;max-width:1260px;margin:0 auto;padding:26px 20px 30px}
+.reveal h1{font-size:32px;line-height:1.2;font-weight:bold;margin:0 0 14px}
+.reveal .intro{font-size:18px;line-height:1.5;max-width:1080px}
+.reveal .intro p{margin:0 0 10px}
+.reveal .stage{width:100%;overflow:hidden;margin:18px 0 10px}
+.reveal .scale{display:inline-block;transform-origin:0 0}
+.reveal .credits{font-size:14px;line-height:1.5;border-top:1px solid var(--ink);padding-top:8px;margin-top:8px}
+.reveal .credits p{margin:0}
+.reveal .tour-go{font:bold 17px var(--font);color:#fff;background:var(--blue);border:2px solid var(--blue);border-radius:8px;padding:5px 14px;cursor:pointer;margin-top:4px}
+.tour-box{position:absolute;pointer-events:none}
+.tour-block{position:fixed;inset:0;z-index:999}
+.tour-spot{position:fixed;z-index:1000;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.6);pointer-events:none;transition:all .35s ease}
+.tour-card{position:fixed;z-index:1001;width:380px;max-width:calc(100vw - 20px);box-sizing:border-box;background:#fff;color:#1a1a1a;border-radius:12px;padding:14px 18px;font:16px/1.45 Arial,Helvetica,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+.tour-n{font-size:13px;margin-bottom:2px}
+.tour-h{font-weight:bold;font-size:18px;color:#00549F;margin-bottom:6px}
+.tour-p sub{font-size:.7em}
+.tour-btns{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+.tour-btns button{font:15px Arial,Helvetica,sans-serif;border-radius:8px;padding:5px 12px;cursor:pointer;border:2px solid #00549F}
+.tour-next{background:#00549F;color:#fff;margin-left:6px}
+.tour-prev{background:#fff;color:#00549F}
+.tour-skip{background:none;border:none!important;color:#1a1a1a;text-decoration:underline;padding:5px 0!important}
+</style></head>
+<body><div class="reveal"><div class="slides"><section class="present pg">
+<h1>Emmagatzematge tèrmic en un llit fix</h1>
+<div class="intro"><p>Un llit d'esferes ceràmiques emmagatzema calor a alta temperatura. Es carrega amb aire calent i es descarrega amb aire fred en sentit contrari. Entre la zona calenta i la freda es forma una zona de transició, la termoclina. La simulació mostra per què, a causa de la termoclina, mai no s'aprofita tota la massa del llit.</p>
+<p><b>Cas d'estudi:</b> el regenerador de <a href="https://doi.org/10.3390/en15165982">Roeder et al. (2022)</a>, que alimenta una electròlisi d'alta temperatura.</p><button class="tour-go">Veure el tutorial</button></div>
+<div class="stage"><div class="scale"><div id="sim-regen-dp" class="sim" style="width:1200px"></div></div></div>
+<div class="credits"><p>Model: model 1D de dues fases (Schumann), coeficient de transferència de calor de Wakao i conducció axial efectiva del llit segons Zehner, Bauer i Schlünder, amb radiació. Recàlcul del cas base V0 de <a href="https://doi.org/10.3390/en15165982">Roeder et al. (2022), Energies 15, 5982</a>, amb les dades de les taules 1 i 2. Comprovació: després de 15 cicles el model dona 333 MWh útils per cicle, l'article 331,7 MWh (p. 11).</p>
+<p>Simulació i text: Enric Prats Salvadó. Icones: generades amb IA.</p></div>
+</section></div></div>
+<script>
+window.Reveal={_h:{},on(e,f){(this._h[e]=this._h[e]||[]).push(f);},
+  fire(e,a){(this._h[e]||[]).forEach(f=>f(a));},
+  getCurrentSlide(){return document.querySelector('section.present');},
+  getIndices(){return {f:2};}};</script><script>window.DATA={};</script><script>/* Helpers for the charge/discharge animations of chapter 2 (Enric, 15.11.2026, decision K22).
+   Flows are dots moving along polylines; a small triangle at the middle of each flow shows the direction,
+   so a still frame (PDF, screenshot) still reads. Rotors turn with the machine speed.
+   An animation only runs while its slide is shown (class "present"). */
+window.ANIM = (function(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (t,a,p,x)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(x!=null)e.textContent=x;if(p)p.appendChild(e);return e;};
+
+  // point and direction at arc length s along a polyline
+  function along(pts, cum, s){
+    let i=1; while(i<pts.length-1 && cum[i]<s) i++;
+    const [x1,y1]=pts[i-1], [x2,y2]=pts[i], L=cum[i]-cum[i-1]||1, t=(s-cum[i-1])/L;
+    return {x:x1+(x2-x1)*t, y:y1+(y2-y1)*t, ux:(x2-x1)/L, uy:(y2-y1)/L};
+  }
+
+  // dots along pts. o: {color | colorAt(s,L), n, r, speed px/s, mid: position of the direction mark (0..1), head: size}
+  function flow(parent, pts, o){
+    o=Object.assign({n:10,r:5,speed:110,mid:0.5,head:18,color:'#00549F'},o);
+    const cum=[0]; for(let i=1;i<pts.length;i++) cum.push(cum[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+    const L=cum[cum.length-1];
+    const g=el('g',{},parent);
+    const dots=[...Array(o.n)].map(()=>el('circle',{r:o.r},g));
+    const mark=o.head?el('path',{fill:o.markColor||o.color},parent):null;
+    let ph=0;
+    function draw(dir, rate){
+      dots.forEach((d,i)=>{
+        const s=((ph+i/o.n)%1+1)%1*L, p=along(pts,cum,s);
+        d.setAttribute('cx',p.x.toFixed(1)); d.setAttribute('cy',p.y.toFixed(1));
+        d.setAttribute('fill', o.colorAt?o.colorAt(s,L):o.color);
+      });
+      g.setAttribute('opacity', Math.min(1,rate*1.5).toFixed(2));
+      if(mark){
+        const p=along(pts,cum,o.mid*L), ux=p.ux*dir, uy=p.uy*dir, h=o.head, w=h*0.38;
+        // triangle centred on the path point, tip in flow direction
+        const tx=p.x+ux*h/2, ty=p.y+uy*h/2, bx=p.x-ux*h/2, by=p.y-uy*h/2;  // slim: length h, half-width 0,38 h
+        mark.setAttribute('d',`M${tx.toFixed(1)},${ty.toFixed(1)} L${(bx-uy*w).toFixed(1)},${(by+ux*w).toFixed(1)} L${(bx+uy*w).toFixed(1)},${(by-ux*w).toFixed(1)} Z`);
+        mark.setAttribute('opacity', rate>0.05?1:0);
+      }
+    }
+    return {L, step(dt,dir,rate){ ph=(ph+dir*rate*o.speed*dt/L)%1; draw(dir,rate); }};
+  }
+
+  // rotor: circle with blades, turns by omega [rad/s]
+  function rotor(parent, cx, cy, r, o){
+    o=Object.assign({blades:4,color:'#1a1a1a',fill:'#FFFFFF',sw:2.5},o);
+    el('circle',{cx,cy,r,fill:o.fill,stroke:o.color,'stroke-width':o.sw},parent);
+    const g=el('g',{},parent);
+    for(let k=0;k<o.blades;k++){
+      const a=2*Math.PI*k/o.blades, ri=r*0.18, ro=r*0.78;
+      // curved blade from the hub to near the rim
+      const x1=cx+ri*Math.cos(a), y1=cy+ri*Math.sin(a), x2=cx+ro*Math.cos(a+0.7), y2=cy+ro*Math.sin(a+0.7);
+      const qx=cx+ro*0.75*Math.cos(a+0.05), qy=cy+ro*0.75*Math.sin(a+0.05);
+      el('path',{d:`M${x1.toFixed(1)},${y1.toFixed(1)} Q${qx.toFixed(1)},${qy.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}`,fill:'none',stroke:o.color,'stroke-width':o.sw,'stroke-linecap':'round'},g);
+    }
+    el('circle',{cx,cy,r:r*0.18,fill:o.color},g);
+    let a=0;
+    return {step(dt,omega){a=(a+omega*dt*180/Math.PI)%360; g.setAttribute('transform',`rotate(${a.toFixed(1)} ${cx} ${cy})`);}};
+  }
+
+  // outlined pipe along pts (outline, then fill), butt ends exactly at the first and last point
+  function pipe(parent, pts, o){
+    o=Object.assign({w:12,fill:'#C7DDF2',edge:'#1a1a1a'},o);
+    const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' L');
+    el('path',{d,fill:'none',stroke:o.edge,'stroke-width':o.w+4,'stroke-linejoin':'miter','stroke-linecap':'butt'},parent);
+    el('path',{d,fill:'none',stroke:o.fill,'stroke-width':o.w,'stroke-linejoin':'miter','stroke-linecap':'butt'},parent);
+  }
+
+  // run fn(dt) every frame while the slide of root is shown; draw once at once
+  function loop(root, fn){
+    let last=null;
+    const sec=()=>root.closest('section');
+    function frame(t){
+      const s=sec();
+      if(s && s.classList.contains('present')){ const dt=last==null?0:Math.min(0.05,(t-last)/1000); last=t; fn(dt); }
+      else last=null;
+      requestAnimationFrame(frame);
+    }
+    fn(0); requestAnimationFrame(frame);
+  }
+
+  // speed of a machine follows its target with a time constant (spin up and down)
+  const ease=(v,target,dt,tau)=>v+(target-v)*Math.min(1,dt/tau);
+
+  // two buttons Laden / Entladen; onChange(mode)
+  function modeButtons(ctl, S, onChange){
+    ctl.innerHTML='<span class="grp"><button data-m="laden">Laden</button><button data-m="entladen">Entladen</button></span>';
+    const bs=[...ctl.querySelectorAll('button')];
+    const mark=()=>bs.forEach(b=>b.classList.toggle('on',b.dataset.m===S.mode));
+    bs.forEach(b=>b.onclick=()=>{S.mode=b.dataset.m; mark(); onChange&&onChange(S.mode);});
+    mark();
+  }
+
+  return {el, flow, rotor, pipe, loop, ease, modeButtons};
+})();
+</script><script>/* Slide 3.9 Regenerator im Zyklusbetrieb (slide list 3.9, decisions K81).
+   Model: recalculation of Roeder et al. 2022 (Energies 15, 5982, https://doi.org/10.3390/en15165982), base case V0,
+   ported 1:1 from V9/tools_regen_model.py (documented there and in docs/V9_evidence.md, last section).
+   1D two-phase Schumann model, gas quasi-stationary per cell, h_v from Wakao (Eq. 4 to 6), axial conduction in the
+   bed with lambda_eff from Zehner, Bauer, Schlünder plus radiation. Inputs Roeder 2022, Tab. 1 and Tab. 2:
+   bauxite bed 14 m x 14 m, porosity 0,4, d_p 0,02 m; charge 500.000 kg/h air at 850 °C from the top until the
+   bottom outlet exceeds theta 0,2 (530 °C) or 9 h; discharge 240.000 kg/h at 450 °C from the bottom until the top
+   outlet falls below theta 0,875 (800 °C) or the day is over (24 h minus charging time).
+   Check: 15 cycles give 332,9 MWh usable (paper 331,66), f_Nutzung 0,590.
+   Buttons: Laden, Entladen (animated, about 3 to 5 s each), 15 Zyklen (runs to cycle 15 without animation),
+   Neustart. No Warten (K81). */
+window.REGEN_MAKE = function(DP){            // DP: ball diameter [m], 0,02 in Roeder 2022
+  const SIG=5.670e-8, L=14, D=14, PSI=0.4, LAM_S=2.5, EPS=0.85, RHO_S=3300, CP_S=1190;
+  const T_HOT=850, T_COLD=450, MC=500000/3600, MD=240000/3600, TC_MAX=9*3600, DAY=24*3600;
+  const TH_HOT=0.875, TH_COLD=0.2, NZ=120, DT=10;
+  const A=Math.PI*D*D/4, DX=L/NZ, CV=(1-PSI)*RHO_S*CP_S, SV=6*(1-PSI)/DP;
+  const QID=CV*A*L*(T_HOT-T_COLD)/3.6e9;                 // MWh
+  function air(Tc){ const T=Tc+273.15;
+    return [1030.5-0.11975*T+3.9734e-4*T*T-3.3238e-7*T**3+8.6e-11*T**4, 2.334e-3*T**1.5/(T+164.54), 1.458e-6*T**1.5/(T+110.4)]; }
+  function hv(Tc,m){ const [cp,lam,mu]=air(Tc); const Re=m/A*DP/(mu*PSI), Pr=mu*cp/lam;
+    return [SV*(2+1.1*Re**0.6*Pr**(1/3))*lam*PSI/DP, cp]; }
+  function lamEff(Tc){ const lg=air(Tc)[1], T=Tc+273.15, kp=LAM_S/lg, kr=4*SIG/(2/EPS-1)*T**3*DP/lg, kG=1;
+    const B=1.25*((1-PSI)/PSI)**(10/9), phi=0.0077;
+    const N=1/kG*(1+(kr-B*kG)/kp)-B*(1/kG-1)*(1+kr/kp);
+    const kc=2/N*(B*(kp+kr-1)/(N*N*kG*kp)*Math.log((kp+kr)/(B*(kG+(1-kG)*(kp+kr))))+(B+1)/(2*B)*(kr/kG-B*(1+(1-kG)*kr))-(B-1)/(N*kG));
+    return ((1-Math.sqrt(1-PSI))*PSI*(1/(PSI-1+1/kG)+kr)+Math.sqrt(1-PSI)*(phi*kp+(1-phi)*kc))*lg; }
+  // tables per 1 K from 400 to 900 °C
+  const T0=400, NT=501, tab=(f)=>Array.from({length:NT},(_,i)=>f(T0+i));
+  const LE=tab(lamEff), HC=tab(T=>hv(T,MC)), HD=tab(T=>hv(T,MD));
+  const ix=T=>Math.max(0,Math.min(NT-1,Math.round(T-T0)));
+  const theta=T=>(T-T_COLD)/(T_HOT-T_COLD);
+  function conduct(ts){
+    const q=new Float64Array(NZ-1);
+    for(let i=0;i<NZ-1;i++) q[i]=LE[ix(0.5*(ts[i]+ts[i+1]))]*(ts[i+1]-ts[i])/DX;
+    for(let i=0;i<NZ;i++) ts[i]+=((i<NZ-1?q[i]:0)-(i>0?q[i-1]:0))/DX*DT/CV;
+  }
+  // one time step with flow; charge: cell 0 (top, hot end) first; returns the gas outlet temperature
+  function step(ts,charge){
+    const m=charge?MC:MD, H=charge?HC:HD; let tg=charge?T_HOT:T_COLD;
+    for(let k=0;k<NZ;k++){ const i=charge?k:NZ-1-k;
+      const [h,cp]=H[ix(0.5*(tg+ts[i]))]; const to=ts[i]+(tg-ts[i])*Math.exp(-h*A*DX/(m*cp));
+      ts[i]+=m*cp*(tg-to)*DT/(CV*A*DX); tg=to; }
+    conduct(ts); return tg;
+  }
+  const heat=ts=>ts.reduce((s,v)=>s+v-T_COLD,0)*CV*A*DX/3.6e9;       // MWh above 450 °C
+  const lam=charge=>{ const [h,cp]=(charge?HC:HD)[ix(650)]; return h*A*L/((charge?MC:MD)*cp); };
+  return {DP,NZ,L,DT,T_HOT,T_COLD,TC_MAX,DAY,TH_HOT,TH_COLD,QID,theta,step,heat,lam};
+};
+window.REGEN = window.REGEN_MAKE(0.02);
+
+// slide 3.9 (fixed d_p = 2 cm) and its variant with a slider for the ball diameter (1 to 10 cm, Wakao valid up to Re 8500)
+function regenSim(root, withSlider){
+  let R=window.REGEN; const el=window.ANIM.el, P=root.id;
+  const INK='#1a1a1a', BLUE='#00549F', GRID='#ECEDED', USED='#8EBAE5';
+  const STOPS=[[0,[0,84,159]],[0.5,[246,168,0]],[1,[204,7,30]]];                // 450, 650, 850 °C
+  const dash=(len,d=6,g=5)=>{ const n=Math.max(1,Math.round((len+g)/(d+g))); return `${((len-(n-1)*g)/n).toFixed(3)} ${g}`; };
+  const fmt=(x,d=0)=>(+x).toLocaleString('ca-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+  function col(T){ const th=Math.max(0,Math.min(1,R.theta(T)));
+    for(let k=1;k<STOPS.length;k++) if(th<=STOPS[k][0]){ const [a,ca]=STOPS[k-1],[b,cb]=STOPS[k],f=(th-a)/(b-a);
+      return `rgb(${ca.map((x,j)=>Math.round(x+(cb[j]-x)*f)).join(',')})`; } }
+
+  const lamTxt=ch=>fmt(Math.round(R.lam(ch)/10)*10);
+  root.innerHTML=`<div style="display:flex;align-items:flex-start;gap:0;position:relative">
+    <!-- cycle counter centred over the profile plot: 250 px left column + (PL + PR)/2 = 475 -->
+    <div class="rg-cnt" style="position:absolute;left:725px;top:4px;transform:translateX(-50%)"><span>Cicle</span><span class="rg-roll"><span class="rg-num">0</span></span></div>
+    <div class="rg-left" style="width:250px;height:560px;font-size:20px;line-height:1.4;display:flex;flex-direction:column">
+      <div class="sim-ctl" style="flex-wrap:wrap;white-space:normal"><button data-a="ch">Carregar</button><button data-a="dc">Descarregar</button><button data-a="n15">15 cicles</button><button data-a="reset"><svg width="18" height="18" viewBox="0 0 18 18" style="vertical-align:-3px;margin-right:6px"><path d="M14.6 6.2 A6.5 6.5 0 1 0 15.2 11" fill="none" stroke="currentColor" stroke-width="2.2"/><polygon points="16.8,1.6 16.4,8 10.6,5.4" fill="currentColor"/></svg>Reiniciar</button></div>
+      <div class="rg-f"></div>
+      <div style="margin-top:14px;font-size:19px;white-space:nowrap">Q<sub>ideal</sub> = m ∙ c<sub>p</sub> ∙ (T<sub>max</sub>&nbsp;−&nbsp;T<sub>min</sub>)</div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:6px"><span>Λ&nbsp;=</span><span class="k3fr"><span>h<sub>v</sub> ∙ A ∙ L</span><span class="k3bar"></span><span>ṁ ∙ c<sub>p,L</sub></span></span></div>
+      <div class="rg-lam" style="font-size:19px;white-space:nowrap;margin-top:4px"></div>
+      <div class="k3bc rg-bc"><span class="k3b">Dades del sistema</span><br>Fluid caloportador: aire<br>Llit d'esferes de bauxita<br>Llit: 14 m d'alçada<br>i 14 m de diàmetre${withSlider?'<div class="rg-dp">Diàmetre d&#39;esfera d<sub>p</sub><br><input type="range" min="1" max="10" step="1" value="2"> <b class="rg-dpv">2 cm</b></div>':''}</div>
+    </div>
+    <svg class="rg-main" width="960" height="560" viewBox="0 0 960 560" font-family="Arial" font-size="17"></svg></div>`;
+  const setLam=()=>{ root.querySelector('.rg-lam').innerHTML=`Λ<sub>càrrega</sub> ≈ <b>${lamTxt(true)}</b>, Λ<sub>descàrrega</sub> ≈ <b>${lamTxt(false)}</b>`; };
+  const svg=root.querySelector('svg.rg-main'), btns=[...root.querySelectorAll('button')];
+  const txt=(a,s,p=svg)=>el('text',Object.assign({fill:INK},a),p,s);
+
+  // ---------- geometry
+  const BY=60, BH=400, BX=120, BW=120, GX=45, GW=24;
+  const yc=x=>BY+BH*x/R.L;
+  const PL=360, PR=590, xt=T=>PL+(PR-PL)*(T-400)/500;
+  const TL=695, TR=950, TT=BY, TB=BY+230, tx=h=>TL+(TR-TL)*h/24, ty=T=>TB-(TB-TT)*(T-400)/500;
+  const QL=695, QR=950, QT=TB+90, QB=BY+BH+30, qx=n=>QL+(QR-QL)*(n-1)/14, qy=q=>QB-(QB-QT)*q/600;
+
+  // ---------- defs: temperature gradients (profile: along x, outlet: along y), filler pattern
+  const defs=el('defs',{},svg);
+  const grad=(id,a)=>{const g=el('linearGradient',Object.assign({id,gradientUnits:'userSpaceOnUse'},a),defs);
+    STOPS.forEach(([o,c])=>el('stop',{offset:o,'stop-color':`rgb(${c})`},g));};
+  grad(P+'rgGx',{x1:xt(450),x2:xt(850),y1:0,y2:0}); grad(P+'rgGy',{x1:0,x2:0,y1:ty(450),y2:ty(850)});
+  // hexagonal packing of small balls; drawn radius grows with the square root of d_p (2,9 px at 2 cm), symbolic size
+  const pat=el('pattern',{id:P+'rgBalls',patternUnits:'userSpaceOnUse',x:BX,y:BY},defs);
+  function setBalls(dp){
+    const r=2.9*Math.sqrt(dp/0.02), pw=2.42*r, ph=pw*Math.sqrt(3);
+    pat.setAttribute('width',pw); pat.setAttribute('height',ph); pat.innerHTML='';
+    const ctr=[[0,0],[pw,0],[pw/2,ph/2],[0,ph],[pw,ph]];
+    const circ=([x,y])=>`M${x+r},${y} a${r},${r} 0 1,0 ${-2*r},0 a${r},${r} 0 1,0 ${2*r},0 Z`;
+    el('path',{d:`M0,0 H${pw} V${ph} H0 Z `+ctr.map(circ).join(' '),'fill-rule':'evenodd',fill:'#fff','fill-opacity':0.35},pat);
+    ctr.forEach(c=>el('path',{d:circ(c),fill:'none',stroke:INK,'stroke-opacity':0.25,'stroke-width':0.7},pat));
+  }
+  setBalls(R.DP);
+  el('clipPath',{id:P+'rgBed'},defs).appendChild(el('rect',{x:BX,y:BY,width:BW,height:BH,rx:12}));
+
+  // ---------- bed
+  const gB=el('g',{'clip-path':'url(#'+P+'rgBed)'},svg);
+  const cells=Array.from({length:R.NZ},(_,i)=>el('rect',{x:BX,y:yc(i*R.L/R.NZ),width:BW,height:BH/R.NZ+0.6},gB));
+  el('rect',{x:BX,y:BY,width:BW,height:BH,fill:'url(#'+P+'rgBalls)'},gB);
+  el('rect',{x:BX,y:BY,width:BW,height:BH,rx:12,fill:'none',stroke:INK,'stroke-width':2},svg);
+  // front between the two cut-off temperatures (530 and 800 °C, theta 0,2 to 0,875, K88) as a dimension line right of the bed (K87): end ticks from the bed edge,
+  // double arrow with both tips on the ticks, rotated label
+  const gT=el('g',{},svg), TX0=BX+BW, TX1=BX+BW+30, TXA=BX+BW+22, AHT=7;
+  function thermo(ts){
+    const th=Array.from(ts,R.theta), xs=i=>(i+0.5)*R.L/R.NZ;
+    const at=t=>{ for(let i=0;i<R.NZ-1;i++) if((th[i]-t)*(th[i+1]-t)<=0 && th[i]!==th[i+1]) return xs(i)+(t-th[i])/(th[i+1]-th[i])*R.L/R.NZ;
+      return null; };
+    const hi=R.TH_HOT, lo=R.TH_COLD;
+    let a=at(hi), b=at(lo);
+    if(a==null && b==null) return null;
+    if(a==null) a=th[0]<hi?0:R.L; if(b==null) b=th[R.NZ-1]>lo?R.L:0;
+    return [Math.min(a,b),Math.max(a,b)];
+  }
+  function drawThermo(ts){
+    gT.innerHTML=''; const r=thermo(ts); if(!r) return;
+    const y1=yc(r[0]), y2=yc(r[1]); if(y2-y1<3*AHT) return;
+    for(const y of [y1,y2]){
+      el('line',{x1:BX,x2:TX0,y1:y,y2:y,stroke:INK,'stroke-width':1.5,'stroke-dasharray':dash(BW)},gT);   // inside the bed
+      el('line',{x1:TX0,x2:TX1,y1:y,y2:y,stroke:INK,'stroke-width':1.5},gT); }
+    const tl=(y,s)=>{ const t=txt({x:TX0+3,y,'font-size':14},'T',gT); el('tspan',{'baseline-shift':'sub','font-size':10},t,s); };
+    tl(y1-11,'descàrrega'); tl(y2+16,'càrrega');
+    el('line',{x1:TXA,x2:TXA,y1:y1+AHT*1.4,y2:y2-AHT*1.4,stroke:INK,'stroke-width':2},gT);
+    el('polygon',{points:`${TXA},${y1} ${TXA-AHT},${y1+AHT*1.4} ${TXA+AHT},${y1+AHT*1.4}`,fill:INK},gT);
+    el('polygon',{points:`${TXA},${y2} ${TXA-AHT},${y2-AHT*1.4} ${TXA+AHT},${y2-AHT*1.4}`,fill:INK},gT);
+    if(y2-y1>50) txt({transform:`translate(${TXA+23},${(y1+y2)/2}) rotate(-90)`,'text-anchor':'middle','font-size':15},`${fmt(r[1]-r[0],1)} m`,gT);
+  }
+  const gA=el('g',{},svg);                                   // arrows and their labels, redrawn on phase change
+  const xm=BX+BW/2, AL=52, AH=11;
+  function arrow(y0,y1){ const d=y1>y0?1:-1, yb=y1-d*AH*1.4;   // line from y0 to the base, head with the tip at y1
+    el('line',{x1:xm,x2:xm,y1:y0,y2:yb,stroke:INK,'stroke-width':3},gA);
+    el('polygon',{points:`${xm},${y1} ${xm-AH},${yb} ${xm+AH},${yb}`,fill:INK},gA); }
+  let labIn, labOut;
+  function drawArrows(charge){
+    gA.innerHTML='';
+    if(charge){ arrow(BY-AL,BY); arrow(BY+BH,BY+BH+AL); }
+    else { arrow(BY+BH+AL,BY+BH); arrow(BY,BY-AL); }
+    const yTop=BY-24, yBot=BY+BH+34;
+    labIn=txt({x:xm+16,y:charge?yTop:yBot,'font-weight':'bold'},'',gA);
+    labOut=txt({x:xm+16,y:charge?yBot:yTop,'font-weight':'bold'},'',gA);
+  }
+  // gauge: heat in the bed as a share of Q_ideal
+  // gauge as a bar with small segments: red fill, white gaps every 10 % (K86)
+  const gFill=el('rect',{x:GX,width:GW,fill:'#CC071E'},svg);
+  for(let k=1;k<10;k++) el('line',{x1:GX,x2:GX+GW,y1:BY+BH*k/10,y2:BY+BH*k/10,stroke:'#fff','stroke-width':3},svg);
+  el('rect',{x:GX,y:BY,width:GW,height:BH,rx:4,fill:'none',stroke:INK,'stroke-width':2},svg);
+  const gTxt=txt({x:GX+GW/2,y:BY+BH+34,'text-anchor':'middle','font-weight':'bold'},'');
+  txt({x:GX+GW/2,y:BY-24,'text-anchor':'middle'},'Calor');
+
+  // ---------- profile plot (depth shared with the bed)
+  for(let T=400;T<=900;T+=100){ el('line',{x1:xt(T),x2:xt(T),y1:BY,y2:BY+BH,stroke:GRID},svg); txt({x:xt(T),y:BY+BH+24,'text-anchor':'middle'},fmt(T)); }
+  for(let m=0;m<=14;m+=2) txt({x:PL-8,y:yc(m)+6,'text-anchor':'end'},fmt(m));
+  el('line',{x1:PL,x2:PL,y1:BY,y2:BY+BH,stroke:INK},svg); el('line',{x1:PL,x2:PR,y1:BY+BH,y2:BY+BH,stroke:INK},svg);
+  txt({x:(PL+PR)/2,y:BY+BH+52,'text-anchor':'middle'},'Temperatura T [°C]');
+  txt({transform:`translate(${PL-40},${BY+BH/2}) rotate(-90)`,'text-anchor':'middle'},'Profunditat x [m]');
+  for(const T of [R.T_COLD+R.TH_COLD*400, R.T_COLD+R.TH_HOT*400])
+    el('line',{x1:xt(T),x2:xt(T),y1:BY,y2:BY+BH,stroke:INK,'stroke-width':1.5,'stroke-dasharray':dash(BH)},svg);
+  const gOld=el('g',{},svg), area=el('polygon',{fill:USED,'fill-opacity':0.45},svg);
+  const pChOld=el('polyline',{fill:'none',stroke:'url(#'+P+'rgGx)','stroke-width':3.5},svg);
+  const pNow=el('polyline',{fill:'none',stroke:'url(#'+P+'rgGx)','stroke-width':3.5},svg);
+  const pts=p=>Array.from(p,(T,i)=>`${xt(T).toFixed(1)},${yc((i+.5)*R.L/R.NZ).toFixed(1)}`);
+
+  // ---------- outlet temperature over time
+  for(let T=400;T<=900;T+=100){ el('line',{x1:TL,x2:TR,y1:ty(T),y2:ty(T),stroke:GRID},svg); txt({x:TL-8,y:ty(T)+6,'text-anchor':'end'},fmt(T)); }
+  for(let h=0;h<=24;h+=6) txt({x:tx(h),y:TB+24,'text-anchor':'middle'},fmt(h));
+  el('line',{x1:TL,x2:TL,y1:TT,y2:TB,stroke:INK},svg); el('line',{x1:TL,x2:TR,y1:TB,y2:TB,stroke:INK},svg);
+  txt({x:(TL+TR)/2,y:TB+50,'text-anchor':'middle'},'Temps t [h]');
+  const yl=txt({transform:`translate(${TL-50},${(TT+TB)/2}) rotate(-90)`,'text-anchor':'middle'},'Sortida T');
+  el('tspan',{'baseline-shift':'sub','font-size':12},yl,'sortida'); el('tspan',{},yl,' [°C]');
+  [[R.T_COLD+R.TH_COLD*400,'Límit de càrrega',-6],[R.T_COLD+R.TH_HOT*400,'Límit de descàrrega',18]].forEach(([T,s,dy])=>{
+    el('line',{x1:TL,x2:TR,y1:ty(T),y2:ty(T),stroke:INK,'stroke-width':1.5,'stroke-dasharray':dash(TR-TL)},svg);
+    txt({x:TR-4,y:ty(T)+dy,'text-anchor':'end','font-size':15},s); });
+  const oCh=el('polyline',{fill:'none',stroke:'url(#'+P+'rgGy)','stroke-width':3},svg);
+  const oDc=el('polyline',{fill:'none',stroke:'url(#'+P+'rgGy)','stroke-width':3},svg);
+
+  // ---------- usable heat per cycle
+  for(const q of [0,300,600]) txt({x:QL-8,y:qy(q)+6,'text-anchor':'end'},fmt(q));
+  el('line',{x1:QL,x2:QL,y1:QT,y2:QB,stroke:INK},svg); el('line',{x1:QL,x2:QR,y1:QB,y2:QB,stroke:INK},svg);
+  el('line',{x1:QL,x2:QR,y1:qy(R.QID),y2:qy(R.QID),stroke:INK,'stroke-dasharray':dash(QR-QL)},svg);
+  const qi=txt({x:QR-4,y:qy(R.QID)-10,'text-anchor':'end','font-size':15},'Q'); el('tspan',{'baseline-shift':'sub','font-size':11},qi,'ideal');
+  for(const n of [1,5,10,15]) txt({x:qx(n),y:QB+22,'text-anchor':'middle'},fmt(n));
+  txt({x:(QL+QR)/2,y:QB+46,'text-anchor':'middle'},'Cicle [-]');
+  const ql=txt({transform:`translate(${QL-50},${(QT+QB)/2}) rotate(-90)`,'text-anchor':'middle'},'Q');
+  el('tspan',{'baseline-shift':'sub','font-size':12},ql,'real'); el('tspan',{},ql,' [MWh]');
+  const gDots=el('g',{},svg);
+
+  // ---------- state and simulation
+  let S, shownN=-1;
+  function reset(){ S={ts:new Float64Array(R.NZ).fill(R.T_COLD), phase:null, t:0, tc:0, n:0, chProf:null, outCh:[], outDc:[], hist:[], tout:R.T_COLD, run:false, fast:false}; setBtns();
+    setLam();
+    shownN=-1;
+    drawArrows(true); draw(); }
+  // advance the running half cycle by k steps; returns true when it has ended
+  function advance(k){
+    const ch=S.phase==='ch';
+    for(let j=0;j<k;j++){
+      S.tout=R.step(S.ts,ch); S.t+=R.DT;
+      if(Math.round(S.t/R.DT)%30===0) (ch?S.outCh:S.outDc).push(S.tout);
+      const th=R.theta(S.tout);
+      if(ch ? (th>R.TH_COLD||S.t>=R.TC_MAX) : (th<R.TH_HOT||S.t>=R.DAY-S.tc)){ finish(); return true; }
+    }
+    return false;
+  }
+  function start(ch){
+    S.phase=ch?'ch':'dc'; S.t=0;
+    if(ch){ S.n++; S.outCh=[]; S.outDc=[]; S.chProf=null; } else { S.outDc=[]; }
+    drawArrows(ch);
+  }
+  function finish(){
+    if(S.phase==='ch'){ S.tc=S.t; S.chProf=Float64Array.from(S.ts); }
+    else if(S.chProf){ let d=0; for(let i=0;i<R.NZ;i++) d+=S.chProf[i]-S.ts[i];
+      S.hist.push({ch:S.chProf, dc:Float64Array.from(S.ts), q:R.heat(S.chProf)-R.heat(S.ts)}); }
+    S.phase=null;
+  }
+  function animate(ch){
+    if(S.run || nextCh()!==ch) return; S.run=true; start(ch); setBtns();      // only the next valid step (K90)
+    const per=ch?14:20;                                        // steps per frame, about 3 to 4 s per half cycle
+    const tick=()=>{ const end=advance(per); draw(); if(!end) requestAnimationFrame(tick); else { S.run=false; setBtns(); draw(); } };
+    requestAnimationFrame(tick);
+  }
+  // 15 Zyklen: the same model, about 300 time steps per frame, so 15 cycles run in a few seconds
+  function runTo15(){
+    if(S.run || S.hist.length>=15) return; S.run=true; S.fast=true; setBtns();
+    const tick=()=>{
+      if(!S.phase){ if(S.hist.length>=15){ S.run=false; S.fast=false; setBtns(); draw(); return; }
+        start(!(S.chProf && S.hist.length<S.n)); }
+      advance(S.phase==='ch'?240:320); draw(); requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  // charging and discharging alternate: after a charge only Entladen, after a discharge (or at the start) only Laden
+  const nextCh=()=>!(S.chProf && S.hist.length<S.n);
+  function setBtns(){
+    const ok={ch:!S.run&&nextCh(), dc:!S.run&&!nextCh(), n15:!S.run&&S.hist.length<15, reset:!S.run};
+    btns.forEach(b=>{ const a=b.dataset.a, run=S.run&&(S.fast?a==='n15':a===S.phase);
+      b.classList.toggle('on',run); b.classList.toggle('off',!run&&!ok[a]); });
+  }
+  btns.forEach(b=>b.onclick=()=>{ const a=b.dataset.a;
+    if(a==='ch') animate(true); else if(a==='dc') animate(false); else if(a==='n15') runTo15(); else if(!S.run) reset(); });
+
+  function draw(){
+    const ts=S.ts;
+    cells.forEach((c,i)=>c.setAttribute('fill',col(ts[i])));
+    const h=R.heat(ts)/R.QID; gFill.setAttribute('y',BY+BH*(1-h)); gFill.setAttribute('height',BH*h); gTxt.textContent=fmt(h*100)+' %';
+    const ch=S.phase==='ch'||(!S.phase&&S.chProf&&S.hist.length<S.n)||(!S.phase&&S.n===0);
+    const shown=S.phase?S.tout:null;
+    if(labIn){ labIn.textContent=`Aire entra ${fmt(ch?R.T_HOT:R.T_COLD)} °C`; labIn.setAttribute('fill', ch?'#CC071E':BLUE);
+      labOut.textContent=shown!=null?`Aire surt ${fmt(shown)} °C`:'Aire surt'; }
+    // profiles: earlier cycles dashed, the last completed cycle as area, the current state solid
+    gOld.innerHTML='';
+    const last=S.hist[S.hist.length-1];
+    const showArea=last && !S.phase && !ch;
+    (showArea?S.hist.slice(0,-1):S.hist).forEach(c=>{ for(const p of [c.ch,c.dc]) el('polyline',{points:pts(p).join(' '),fill:'none',stroke:'url(#'+P+'rgGx)','stroke-width':1.5,'stroke-dasharray':'5 4','stroke-opacity':0.6},gOld); });
+    if(showArea){ area.setAttribute('points',pts(last.ch).concat(pts(last.dc).reverse()).join(' ')); pChOld.setAttribute('points',pts(last.ch).join(' ')); }
+    else { area.setAttribute('points',''); pChOld.setAttribute('points', S.chProf&&S.phase==='dc'?pts(S.chProf).join(' '):''); }
+    pNow.setAttribute('points',pts(ts).join(' '));
+    drawThermo(ts);
+    oCh.setAttribute('points',S.outCh.map((T,k)=>`${tx((k+1)*30*R.DT/3600).toFixed(1)},${ty(T).toFixed(1)}`).join(' '));
+    oDc.setAttribute('points',S.outDc.map((T,k)=>`${tx(S.tc/3600+(k+1)*30*R.DT/3600).toFixed(1)},${ty(T).toFixed(1)}`).join(' '));
+    const live=S.phase==='dc'&&S.chProf ? R.heat(S.chProf)-R.heat(ts) : null;      // heat taken out so far in this cycle
+    gDots.innerHTML=''; S.hist.forEach((c,k)=>el('circle',{cx:qx(k+1),cy:qy(c.q),r:5,fill:BLUE},gDots));
+    if(live!=null) el('circle',{cx:qx(S.hist.length+1),cy:qy(live),r:5,fill:'#fff',stroke:BLUE,'stroke-width':2},gDots);
+    const qShow = live!=null ? live : (last ? last.q : null);
+    if(S.n!==shownN){ const roll=root.querySelector('.rg-roll');
+      [...roll.children].forEach(c=>{ if(shownN<0) c.remove(); else { c.className='rg-num out'; setTimeout(()=>c.remove(),S.fast?120:350); } });
+      const nn=document.createElement('span'); nn.className='rg-num'+(shownN<0?'':(S.fast?' in fast':' in')); nn.textContent=S.n; roll.appendChild(nn); shownN=S.n; }
+    const fr=(a,b)=>`<span class="k3fr"><span>${a}</span><span class="k3bar"></span><span>${b}</span></span>`;
+    root.querySelector('.rg-f').innerHTML=`<div style="display:flex;align-items:center;gap:6px"><span>f<sub>ús</sub>&nbsp;=</span>${fr('Q<sub>real</sub>','Q<sub>ideal</sub>')}</div>`+
+      (qShow!=null?`<div style="display:flex;align-items:center;gap:6px;margin-top:6px"><span>=</span>${fr(fmt(qShow)+' MWh',fmt(R.QID)+' MWh')}<span>=</span><b>${fmt(qShow/R.QID*100)} %</b></div>`:'');
+  }
+  const sl=root.querySelector('.rg-dp input');
+  if(sl){ sl.oninput=()=>{ root.querySelector('.rg-dpv').textContent=sl.value+' cm'; };
+    sl.onchange=()=>{ if(S.run){ sl.value=Math.round(R.DP*100); root.querySelector('.rg-dpv').textContent=sl.value+' cm'; return; }
+      R=window.REGEN_MAKE(+sl.value/100); setBalls(R.DP); reset(); }; }
+  setLam();
+  reset();
+  return {reset, runTo15};
+}
+(window.SIMS=window.SIMS||[]).push(['sim-regen-dp', root=>regenSim(root,true)]);   // 3.9b chosen by Enric (K86)
+</script><script>
+(window.SIMS||[]).forEach(([id,f])=>{const e=document.getElementById(id); if(e) window['sim_'+id.replace(/-/g,'_')]=f(e);});
+const sec=document.querySelector('section.present'), stage=document.querySelector('.stage'), sc=document.querySelector('.scale');
+function fit(){ const nat=[sc.offsetWidth, sc.offsetHeight], s=Math.min(1,stage.clientWidth/nat[0]); sc.style.transform='scale('+s+')'; stage.style.height=(nat[1]*s+4)+'px';
+  Reveal.fire('slidechanged',{currentSlide:sec}); }
+window.addEventListener('resize',fit);
+Reveal.fire('ready',{}); fit(); window.addEventListener('load',fit); setTimeout(fit,300);</script><script>/* Guided tutorial: the page goes dark, one part of the simulation stays lit, a card explains it.
+   Steps: {t: target (CSS selector, or [x,y,w,h] in unscaled sim coordinates), h: title, p: text (HTML), go: action}.
+   Buttons: Anterior, Següent, Salta el tutorial. Keys: arrows, Esc. Clicks outside the card are blocked while it runs. */
+window.TOUR = function(simRoot, steps){
+  simRoot.style.position = 'relative';
+  const mk = (tag, cls, par) => { const e = document.createElement(tag); e.className = cls; (par || document.body).appendChild(e); return e; };
+  let i = -1, block, spot, card, boxEl;
+  function target(t){
+    if (!t) return null;
+    if (typeof t === 'string') return document.querySelector(t);
+    if (!boxEl) { boxEl = mk('div', 'tour-box', simRoot); }
+    Object.assign(boxEl.style, {left: t[0]+'px', top: t[1]+'px', width: t[2]+'px', height: t[3]+'px'});
+    return boxEl;
+  }
+  function place(){
+    if (i < 0) return;
+    const el = target(steps[i].t), vw = innerWidth, vh = innerHeight, pad = 8;
+    if (!el) { Object.assign(spot.style, {left: vw/2+'px', top: vh/2+'px', width: '0px', height: '0px'});
+      card.style.left = (vw - card.offsetWidth)/2 + 'px'; card.style.top = (vh - card.offsetHeight)/2 + 'px'; return; }
+    const r = el.getBoundingClientRect();
+    const R = {l: r.left - pad, t: r.top - pad, w: r.width + 2*pad, h: r.height + 2*pad};
+    Object.assign(spot.style, {left: R.l+'px', top: R.t+'px', width: R.w+'px', height: R.h+'px'});
+    const cw = card.offsetWidth, ch = card.offsetHeight, g = 14;
+    let x, y;
+    if (vw - (R.l + R.w) > cw + g + 10) { x = R.l + R.w + g; y = R.t; }          // right of the target
+    else if (R.l > cw + g + 10) { x = R.l - cw - g; y = R.t; }                   // left
+    else if (vh - (R.t + R.h) > ch + g + 10) { x = R.l; y = R.t + R.h + g; }     // below
+    else if (R.t > ch + g + 10) { x = R.l; y = R.t - ch - g; }                   // above
+    else { x = vw - cw - 16; y = vh - ch - 16; }                                 // corner, over the target
+    card.style.left = Math.max(10, Math.min(vw - cw - 10, x)) + 'px';
+    card.style.top = Math.max(10, Math.min(vh - ch - 10, y)) + 'px';
+  }
+  function show(n){
+    i = n; const s = steps[i];
+    card.innerHTML = `<div class="tour-n">${i+1} / ${steps.length}</div><div class="tour-h">${s.h}</div><div class="tour-p">${s.p}</div>
+      <div class="tour-btns"><button class="tour-skip">${i === steps.length-1 ? '' : 'Salta el tutorial'}</button>
+      <span>${i > 0 ? '<button class="tour-prev">Anterior</button>' : ''}<button class="tour-next">${s.next || (i === steps.length-1 ? 'Fet' : 'Següent')}</button></span></div>`;
+    card.querySelector('.tour-next').onclick = next;
+    const pv = card.querySelector('.tour-prev'); if (pv) pv.onclick = () => show(i-1);
+    const sk = card.querySelector('.tour-skip'); if (sk.textContent) sk.onclick = end; else sk.style.visibility = 'hidden';
+    if (s.go) s.go();
+    const el = target(s.t); if (el) el.scrollIntoView({block: 'center', inline: 'nearest'});
+    requestAnimationFrame(() => requestAnimationFrame(place));
+  }
+  function next(){ if (i < steps.length-1) show(i+1); else end(); }
+  function end(){ [block, spot, card].forEach(e => e && e.remove()); block = spot = card = null; i = -1; }
+  function start(){
+    if (card) return;
+    block = mk('div', 'tour-block'); spot = mk('div', 'tour-spot'); card = mk('div', 'tour-card');
+    show(0);
+  }
+  addEventListener('resize', place); addEventListener('scroll', place, true);
+  addEventListener('keydown', e => { if (!card) return;
+    if (e.key === 'Escape') end(); else if (e.key === 'ArrowRight') next(); else if (e.key === 'ArrowLeft' && i > 0) show(i-1); });
+  return {start, end};
+};
+</script><script>const T=window.TOUR(document.getElementById('sim-regen-dp'),(()=>{
+  const R='#sim-regen-dp', b=a=>document.querySelector(R+' button[data-a="'+a+'"]');
+  const when=(a)=>{ let n=0; const t=setInterval(()=>{ const e=b(a); if(!e.classList.contains('off')||++n>60){ clearInterval(t); e.click(); } },150); };
+  return [
+  {t:null, h:'Com funciona aquesta simulació', next:'Comença', p:"La simulació mostra com es mou la termoclina en un llit d'esferes que es carrega i es descarrega, i quina part de la calor s'aprofita. El tutorial la presenta en set passos. També es pot obrir més tard amb el botó «Veure el tutorial»."},
+  {t:R+' .rg-left .sim-ctl', h:'Els botons', p:"Carregar i Descarregar fan mitja volta del cicle. 15 cicles calcula seguit fins al cicle 15. Reiniciar torna al llit fred."},
+  {t:[280,0,300,560], h:'El llit', go:()=>{ b('reset').click(); when('ch'); }, p:"El llit d'esferes, vist de costat. El color és la temperatura: blau 450 °C, vermell 850 °C. Ara s'està carregant: l'aire calent entra per dalt i el front baixa. A l'esquerra, la calor emmagatzemada respecte del màxim. La cota de la dreta marca el front, la zona entre 530 i 800 °C."},
+  {t:[560,0,330,560], h:'El perfil de temperatura', go:()=>when('dc'), p:"La temperatura al llarg del llit. Les línies verticals discontínues són els dos límits. Ara es descarrega: l'aire fred entra per baix i el front puja. L'àrea blava és la calor aprofitada en el cicle."},
+  {t:[890,40,310,320], h:"L'aire de sortida", p:"La càrrega s'atura quan l'aire que surt per baix supera 530 °C. Aquest aire torna a l'escalfador, i els ventiladors, les vàlvules i els conductes del costat fred no estan pensats per a temperatures més altes; a més, la calor que surt per baix es perd. La descàrrega s'atura quan l'aire que surt per dalt baixa de 800 °C, perquè l'electròlisi d'alta temperatura en necessita almenys 800. Per això el front sempre queda dins del llit."},
+  {t:[890,350,310,210], h:'Calor útil per cicle', go:()=>when('n15'), p:"La calor aprofitada a cada cicle davant del màxim teòric Q<sub>ideal</sub>. Ara es calculen 15 cicles: el front s'eixampla de cicle en cicle i la calor útil baixa fins a un estat estacionari."},
+  {t:R+' .rg-f', h:"Fracció d'aprofitament", p:"f<sub>ús</sub> és la part del màxim teòric que s'aprofita realment. A sota, Λ indica com de bona és la transferència de calor entre l'aire i les esferes: com més gran, més estret és el front."},
+  {t:R+' .rg-dp', h:'Ara prova-ho', p:"Es pot canviar el diàmetre de les esferes i tornar a prémer 15 cicles. Amb esferes més grans, Λ és més petit, el front és més ample i s'aprofita menys calor."}];
+})());
+document.querySelector('.tour-go').onclick=()=>T.start(); setTimeout(()=>T.start(),700);</script>
+</body></html>
