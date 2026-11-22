@@ -1,6 +1,6 @@
 # Explorables
 
-Simulacions interactives per a la docència de l'energia solar tèrmica de concentració i de l'emmagatzematge de calor, en català.
+Simulacions interactives per a la docència, en català. Cada simulació inclou un tutorial guiat.
 
 - `multiple_solar.html`: disseny d'una planta termosolar (múltiple solar i emmagatzematge).
 - `termoclina_regenerador.html`: emmagatzematge tèrmic en un llit fix (termoclina).
